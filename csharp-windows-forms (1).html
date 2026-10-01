@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C# en Windows Forms – Fundamentos de Programación</title>
+<style>
+  :root{
+    --desk:#008080; --face:#c0c0c0; --paper:#ffffff; --text:#111; --muted:#444;
+    --navy:#000080; --title:linear-gradient(90deg,#000080,#1084d0);
+    --hi:#ffffff; --lo:#404040; --mid:#808080;
+    --code-bg:#1e1e1e; --code-text:#d4d4d4; --ok:#0a7a2f; --bad:#b00020;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:Tahoma,"Segoe UI",Verdana,sans-serif;background:var(--desk);color:var(--text);line-height:1.6;padding-bottom:56px;
+    background-image:radial-gradient(rgba(0,0,0,.12) 1px,transparent 1px);background-size:6px 6px}
+
+  /* Hero como ventana */
+  header.hero{padding:40px 20px 8px;display:flex;justify-content:center}
+  .winhero{width:100%;max-width:760px;background:var(--face);border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi);box-shadow:0 0 0 1px #000,8px 8px 0 rgba(0,0,0,.35)}
+  .tb{background:var(--title);color:#fff;font-weight:700;font-size:.9rem;padding:4px 8px;display:flex;justify-content:space-between;letter-spacing:.02em}
+  .ctl{letter-spacing:.25em;font-weight:400}
+  .wb{padding:26px 24px 22px;text-align:center}
+  .wb h1{margin:0 0 6px;font-size:clamp(1.8rem,4.5vw,2.7rem);color:var(--navy);letter-spacing:-.01em}
+  .wb p{margin:0 auto;max-width:560px;color:var(--muted)}
+  .badges{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .badge{background:var(--paper);border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);padding:2px 12px;font-size:.82rem}
+
+  .layout{display:grid;grid-template-columns:250px 1fr;gap:26px;max-width:1200px;margin:0 auto;padding:22px 20px 40px}
+
+  /* Índice como ventana "Explorador" */
+  nav.toc{position:sticky;top:16px;align-self:start;background:var(--face);border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi);box-shadow:0 0 0 1px #000,6px 6px 0 rgba(0,0,0,.35);padding:0 0 6px;max-height:calc(100vh - 90px);overflow:auto}
+  nav.toc h3{margin:0 0 6px;background:var(--title);color:#fff;font-size:.9rem;padding:4px 10px}
+  nav.toc h3::before{content:"📁 "}
+  nav.toc a{display:block;padding:5px 14px;color:#000;text-decoration:none;font-size:.9rem}
+  nav.toc a:hover,nav.toc a.active{background:var(--navy);color:#fff}
+
+  /* Secciones como ventanas */
+  main section{background:var(--paper);border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi);box-shadow:0 0 0 1px #000,6px 6px 0 rgba(0,0,0,.35);padding:26px 28px;margin-bottom:28px}
+  h2{margin:-26px -28px 20px;background:var(--title);color:#fff;font-size:1.02rem;padding:5px 10px;display:flex;justify-content:space-between;align-items:center}
+  h2::after{content:"▁ ▢ ✕";letter-spacing:.25em;font-weight:400;font-size:.8rem}
+  h3{margin:1.6em 0 .5em;color:var(--navy);border-bottom:2px dotted var(--mid);padding-bottom:3px;font-size:1.05rem}
+  p,li{max-width:75ch}
+  code{font-family:Consolas,"Cascadia Code","Courier New",monospace;background:#ececec;border:1px solid #bbb;color:#a31515;padding:0 5px;font-size:.9em}
+
+  /* Código estilo editor oscuro */
+  .code-wrap{position:relative;margin:22px 0 14px}
+  pre{margin:0;background:var(--code-bg);color:var(--code-text);padding:18px 18px;overflow:auto;font-size:.88rem;line-height:1.55;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+  pre code{background:none;border:0;color:inherit;padding:0;font-size:inherit}
+  .file{position:absolute;top:-1px;left:10px;transform:translateY(-100%);background:var(--face);color:#000;font-size:.74rem;padding:2px 12px;border:2px solid;border-bottom:0;border-color:var(--hi) var(--lo) transparent var(--hi);font-family:Consolas,monospace}
+  .copy{position:absolute;top:8px;right:8px;background:var(--face);color:#000;border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi);padding:2px 10px;font-size:.75rem;cursor:pointer;font-family:inherit}
+  .copy:active{border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+  .k{color:#569cd6} .s{color:#ce9178} .c{color:#6a9955;font-style:italic} .n{color:#b5cea8} .t{color:#4ec9b0}
+
+  /* Avisos tipo tooltip */
+  .note{background:#ffffe1;border:1px solid #000;box-shadow:3px 3px 0 rgba(0,0,0,.3);padding:10px 14px;margin:18px 0}
+  .note::before{content:"⚠ ";}
+  .tip{background:#e3f7e3;border:1px solid #0a7a2f;box-shadow:3px 3px 0 rgba(0,0,0,.2);padding:10px 14px;margin:18px 0}
+  .tip::before{content:"💡 "}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:.92rem;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+  th,td{border:1px solid var(--mid);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--face);color:#000}
+  tr:nth-child(even) td{background:#f5f5f5}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:14px 0}
+  .mini{background:var(--face);padding:14px;border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi)}
+  .mini b{color:var(--navy)}
+
+  .mock{max-width:420px;margin:16px 0;background:var(--face);border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi);box-shadow:0 0 0 1px #000,5px 5px 0 rgba(0,0,0,.3);color:#000}
+  .mock .bar{background:var(--title);color:#fff;padding:3px 8px;font-size:.82rem;font-weight:700}
+  .mock .body{padding:14px;display:grid;gap:8px;font-size:.85rem}
+  .mock input{padding:3px 6px;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);background:#fff;font-size:.85rem;width:100%;font-family:inherit}
+  .mock button,.btn{background:var(--face);color:#000;border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi);padding:5px 18px;cursor:pointer;font-family:inherit;font-size:.95rem;outline:1px solid #000;outline-offset:-4px}
+  .mock button:active,.btn:active{border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+
+  .quiz-q{margin:18px 0;padding:14px;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);background:#fafafa}
+  .quiz-q label{display:block;padding:5px 10px;cursor:pointer}
+  .quiz-q label:hover{background:var(--navy);color:#fff}
+  .quiz-q.ok{outline:3px solid var(--ok)} .quiz-q.bad{outline:3px solid var(--bad)}
+  .fb{font-size:.9rem;margin-top:6px}
+
+  .exwrap{counter-reset:ex}
+  .ex{counter-increment:ex;margin:12px 0;padding:12px 16px;background:var(--face);border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi)}
+  .ex h4{margin:0 0 4px;color:var(--navy)}
+  .ex h4::before{content:"Ejercicio " counter(ex) " · "}
+  .ex p{margin:0}
+
+  /* Barra de tareas */
+  footer{position:fixed;left:0;right:0;bottom:0;height:42px;background:var(--face);border-top:2px solid var(--hi);display:flex;align-items:center;gap:10px;padding:0 8px;font-size:.85rem;z-index:10;box-shadow:0 -1px 0 #000}
+  footer .start{background:var(--face);border:2px solid;border-color:var(--hi) var(--lo) var(--lo) var(--hi);padding:3px 12px;font-weight:700;display:flex;gap:6px;align-items:center}
+  footer .task{flex:1;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);padding:3px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#d8d8d8}
+  footer .clock{border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);padding:3px 10px}
+
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr}
+    nav.toc{position:static;max-height:none}
+    main section{padding:22px 16px}
+    h2{margin:-22px -16px 18px}
+    footer .task{display:none}
+  }
+
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="winhero">
+    <div class="tb"><span>🪟 Bienvenido.exe</span><span class="ctl">▁ ▢ ✕</span></div>
+    <div class="wb">
+      <h1>C# en Windows Forms</h1>
+      <p>Guía práctica para Fundamentos de Programación: crea tus primeras aplicaciones de escritorio con interfaz gráfica.</p>
+      <div class="badges">
+        <span class="badge">C#</span><span class="badge">.NET</span><span class="badge">Visual Studio</span><span class="badge">Nivel: principiante</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc" id="toc">
+  <h3>Contenido</h3>
+  <a href="#intro">1. ¿Qué es Windows Forms?</a>
+  <a href="#entorno">2. Preparar el entorno</a>
+  <a href="#proyecto">3. Estructura del proyecto</a>
+  <a href="#controles">4. Controles principales</a>
+  <a href="#eventos">5. Eventos</a>
+  <a href="#holamundo">6. Tu primera aplicación</a>
+  <a href="#variables">7. Variables y tipos de datos</a>
+  <a href="#conversion">8. Conversión y validación</a>
+  <a href="#condicionales">9. Condicionales</a>
+  <a href="#bucles">10. Ciclos</a>
+  <a href="#listas">11. ListBox y ComboBox</a>
+  <a href="#mensajes">12. MessageBox</a>
+  <a href="#formularios">13. Varios formularios</a>
+  <a href="#calculadora">14. Proyecto: calculadora</a>
+  <a href="#errores">15. Errores comunes</a>
+  <a href="#practicas">16. Buenas prácticas</a>
+  <a href="#ejercicios">17. Ejercicios</a>
+  <a href="#quiz">18. Autoevaluación</a>
+</nav>
+
+<main>
+
+<section id="intro">
+  <h2>1. ¿Qué es Windows Forms?</h2>
+  <p><strong>Windows Forms (WinForms)</strong> es una tecnología de .NET para crear aplicaciones de escritorio con interfaz gráfica: ventanas, botones, cuadros de texto, listas, etc. Es ideal para aprender porque puedes <em>ver</em> el resultado de tu código de inmediato.</p>
+  <div class="grid">
+    <div class="mini"><b>Diseñador visual</b><br>Arrastras controles desde el Cuadro de herramientas y los acomodas en el formulario.</div>
+    <div class="mini"><b>Programación por eventos</b><br>Tu código se ejecuta cuando el usuario hace algo: clic, escribir, seleccionar…</div>
+    <div class="mini"><b>Lenguaje C#</b><br>Escribes la lógica (cálculos, validaciones, decisiones) en C#.</div>
+  </div>
+  <div class="note"><strong>Idea clave:</strong> en consola el programa dicta el orden. En Windows Forms, <em>el usuario</em> decide qué pasa y cuándo; tu programa <em>reacciona</em>.</div>
+</section>
+
+<section id="entorno">
+  <h2>2. Preparar el entorno</h2>
+  <ol>
+    <li>Instala <strong>Visual Studio Community</strong> (gratuito) y marca la carga de trabajo <em>"Desarrollo de escritorio con .NET"</em>.</li>
+    <li>Abre Visual Studio → <strong>Crear un proyecto</strong>.</li>
+    <li>Elige la plantilla <strong>Aplicación de Windows Forms</strong> (C#). Cuidado: no elijas la de ".NET Framework" a menos que tu clase lo pida.</li>
+    <li>Ponle un nombre (por ejemplo <code>MiPrimerForm</code>) y pulsa <strong>Crear</strong>.</li>
+  </ol>
+  <h3>Ventanas importantes del IDE</h3>
+  <table>
+    <tr><th>Ventana</th><th>Para qué sirve</th></tr>
+    <tr><td>Cuadro de herramientas (Toolbox)</td><td>Lista de controles que puedes arrastrar al formulario.</td></tr>
+    <tr><td>Diseñador</td><td>Vista visual del formulario.</td></tr>
+    <tr><td>Propiedades (F4)</td><td>Cambia nombre, texto, color, tamaño… del control seleccionado. También tiene el botón ⚡ de <em>eventos</em>.</td></tr>
+    <tr><td>Explorador de soluciones</td><td>Archivos del proyecto.</td></tr>
+  </table>
+  <div class="tip">Atajos útiles: <code>F7</code> alterna entre diseñador y código · <code>F5</code> ejecuta · <code>F4</code> abre Propiedades.</div>
+</section>
+
+<section id="proyecto">
+  <h2>3. Estructura del proyecto</h2>
+  <table>
+    <tr><th>Archivo</th><th>Contenido</th></tr>
+    <tr><td><code>Program.cs</code></td><td>Punto de entrada: arranca la aplicación y muestra el primer formulario.</td></tr>
+    <tr><td><code>Form1.cs</code></td><td><strong>Aquí escribes tu código</strong> (eventos y lógica).</td></tr>
+    <tr><td><code>Form1.Designer.cs</code></td><td>Código generado automáticamente por el diseñador. <strong>No lo edites a mano.</strong></td></tr>
+  </table>
+  <div class="code-wrap"><span class="file">Program.cs</span><button class="copy">Copiar</button>
+<pre><code class="cs">namespace MiPrimerForm
+{
+    internal static class Program
+    {
+        [STAThread]
+        static void Main()
+        {
+            ApplicationConfiguration.Initialize();
+            Application.Run(new Form1());   // abre el formulario principal
+        }
+    }
+}</code></pre></div>
+  <div class="code-wrap"><span class="file">Form1.cs</span><button class="copy">Copiar</button>
+<pre><code class="cs">namespace MiPrimerForm
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();   // crea los controles del diseñador
+        }
+
+        // Aquí van tus eventos
+    }
+}</code></pre></div>
+  <p><code>partial class</code> significa que la clase está dividida en dos archivos (<code>Form1.cs</code> y <code>Form1.Designer.cs</code>) que C# une al compilar.</p>
+</section>
+
+<section id="controles">
+  <h2>4. Controles principales</h2>
+  <p>Un <strong>control</strong> es un objeto visual. Cada uno tiene <strong>propiedades</strong> (cómo se ve), <strong>métodos</strong> (qué puede hacer) y <strong>eventos</strong> (qué le puede pasar).</p>
+  <table>
+    <tr><th>Control</th><th>Uso</th><th>Propiedad clave</th><th>Prefijo sugerido</th></tr>
+    <tr><td>Label</td><td>Muestra texto</td><td><code>Text</code></td><td><code>lbl</code></td></tr>
+    <tr><td>TextBox</td><td>El usuario escribe datos</td><td><code>Text</code></td><td><code>txt</code></td></tr>
+    <tr><td>Button</td><td>Ejecutar una acción</td><td><code>Text</code>, evento <code>Click</code></td><td><code>btn</code></td></tr>
+    <tr><td>CheckBox</td><td>Opción sí/no</td><td><code>Checked</code></td><td><code>chk</code></td></tr>
+    <tr><td>RadioButton</td><td>Una opción entre varias</td><td><code>Checked</code></td><td><code>rdb</code></td></tr>
+    <tr><td>ComboBox</td><td>Lista desplegable</td><td><code>SelectedItem</code></td><td><code>cmb</code></td></tr>
+    <tr><td>ListBox</td><td>Lista visible de elementos</td><td><code>Items</code></td><td><code>lst</code></td></tr>
+    <tr><td>NumericUpDown</td><td>Número con flechas</td><td><code>Value</code></td><td><code>nud</code></td></tr>
+    <tr><td>DateTimePicker</td><td>Seleccionar fecha</td><td><code>Value</code></td><td><code>dtp</code></td></tr>
+    <tr><td>PictureBox</td><td>Mostrar imagen</td><td><code>Image</code></td><td><code>pic</code></td></tr>
+  </table>
+  <div class="note"><strong>Importante:</strong> cambia la propiedad <code>(Name)</code> de cada control a algo descriptivo (<code>txtNombre</code>, <code>btnCalcular</code>). Código con nombres como <code>button1</code> y <code>textBox3</code> es muy difícil de leer.</div>
+  <h3>Cambiar propiedades desde código</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">lblTitulo.Text = "Bienvenido";
+lblTitulo.ForeColor = Color.DarkBlue;
+btnGuardar.Enabled = false;     // deshabilita el botón
+txtClave.PasswordChar = '*';    // oculta lo que se escribe
+lblError.Visible = false;       // oculta el control</code></pre></div>
+</section>
+
+<section id="eventos">
+  <h2>5. Eventos</h2>
+  <p>Un <strong>evento</strong> es algo que ocurre (clic, tecla, cambio de texto). El método que responde se llama <strong>manejador de eventos</strong> (<em>event handler</em>).</p>
+  <table>
+    <tr><th>Evento</th><th>Se dispara cuando…</th></tr>
+    <tr><td><code>Click</code></td><td>El usuario hace clic.</td></tr>
+    <tr><td><code>TextChanged</code></td><td>Cambia el texto de un TextBox.</td></tr>
+    <tr><td><code>KeyPress</code></td><td>Se presiona una tecla.</td></tr>
+    <tr><td><code>Load</code></td><td>El formulario se está cargando.</td></tr>
+    <tr><td><code>SelectedIndexChanged</code></td><td>Cambia la selección de una lista.</td></tr>
+    <tr><td><code>CheckedChanged</code></td><td>Se marca/desmarca un CheckBox o RadioButton.</td></tr>
+  </table>
+  <p><strong>Cómo crear un manejador:</strong> haz <em>doble clic</em> sobre el control en el diseñador (crea el evento por defecto), o abre Propiedades → ⚡ y haz doble clic junto al evento deseado.</p>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">private void btnSaludar_Click(object sender, EventArgs e)
+{
+    // se ejecuta cada vez que se hace clic en btnSaludar
+}</code></pre></div>
+  <ul>
+    <li><code>sender</code>: el control que originó el evento.</li>
+    <li><code>e</code>: información adicional del evento.</li>
+  </ul>
+  <h3>Ejemplo: aceptar solo números en un TextBox</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">private void txtEdad_KeyPress(object sender, KeyPressEventArgs e)
+{
+    // Permite dígitos y la tecla Retroceso
+    if (!char.IsDigit(e.KeyChar) &amp;&amp; e.KeyChar != (char)Keys.Back)
+    {
+        e.Handled = true;   // cancela la tecla
+    }
+}</code></pre></div>
+</section>
+
+<section id="holamundo">
+  <h2>6. Tu primera aplicación: "Hola, nombre"</h2>
+  <div class="mock" aria-label="Vista previa del formulario">
+    <div class="bar">🪟 Saludo</div>
+    <div class="body">
+      <label>Escribe tu nombre:</label>
+      <input id="demoNombre" placeholder="txtNombre">
+      <button id="demoBtn">btnSaludar</button>
+      <strong id="demoOut">lblResultado</strong>
+    </div>
+  </div>
+  <p><em>(Maqueta interactiva: así se comportaría tu programa.)</em></p>
+  <h3>Pasos</h3>
+  <ol>
+    <li>Agrega un <strong>Label</strong> con <code>Text = "Escribe tu nombre:"</code>.</li>
+    <li>Agrega un <strong>TextBox</strong> y nómbralo <code>txtNombre</code>.</li>
+    <li>Agrega un <strong>Button</strong>: <code>(Name) = btnSaludar</code>, <code>Text = "Saludar"</code>.</li>
+    <li>Agrega un <strong>Label</strong> llamado <code>lblResultado</code> y deja su <code>Text</code> vacío.</li>
+    <li>Doble clic en el botón y escribe:</li>
+  </ol>
+<div class="code-wrap"><span class="file">Form1.cs</span><button class="copy">Copiar</button>
+<pre><code class="cs">private void btnSaludar_Click(object sender, EventArgs e)
+{
+    string nombre = txtNombre.Text;
+    lblResultado.Text = $"¡Hola, {nombre}!";
+}</code></pre></div>
+  <p>La sintaxis <code>$"...{variable}..."</code> se llama <strong>interpolación de cadenas</strong>: inserta el valor de variables dentro del texto.</p>
+</section>
+
+<section id="variables">
+  <h2>7. Variables y tipos de datos</h2>
+  <p>Una variable es un espacio en memoria con nombre y tipo. En C# debes declarar el tipo.</p>
+  <table>
+    <tr><th>Tipo</th><th>Guarda</th><th>Ejemplo</th></tr>
+    <tr><td><code>int</code></td><td>Enteros</td><td><code>int edad = 20;</code></td></tr>
+    <tr><td><code>double</code></td><td>Decimales</td><td><code>double precio = 19.99;</code></td></tr>
+    <tr><td><code>decimal</code></td><td>Decimales precisos (dinero)</td><td><code>decimal total = 150.50m;</code></td></tr>
+    <tr><td><code>string</code></td><td>Texto</td><td><code>string nombre = "Ana";</code></td></tr>
+    <tr><td><code>char</code></td><td>Un carácter</td><td><code>char letra = 'A';</code></td></tr>
+    <tr><td><code>bool</code></td><td>Verdadero/falso</td><td><code>bool aprobado = true;</code></td></tr>
+  </table>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">const double IVA = 0.16;          // constante: no cambia
+int cantidad = 3;
+double precio = 25.5;
+double subtotal = cantidad * precio;
+double total = subtotal * (1 + IVA);</code></pre></div>
+  <h3>Operadores</h3>
+  <table>
+    <tr><th>Tipo</th><th>Operadores</th></tr>
+    <tr><td>Aritméticos</td><td><code>+ - * / %</code> (el <code>%</code> es el residuo)</td></tr>
+    <tr><td>Comparación</td><td><code>== != &lt; &gt; &lt;= &gt;=</code></td></tr>
+    <tr><td>Lógicos</td><td><code>&amp;&amp;</code> (y) · <code>||</code> (o) · <code>!</code> (no)</td></tr>
+    <tr><td>Asignación</td><td><code>= += -= *= /= ++ --</code></td></tr>
+  </table>
+  <div class="note">Cuidado: <code>=</code> <em>asigna</em> y <code>==</code> <em>compara</em>. Además, <code>7 / 2</code> con enteros da <code>3</code>; usa <code>7 / 2.0</code> para obtener <code>3.5</code>.</div>
+</section>
+
+<section id="conversion">
+  <h2>8. Conversión y validación de datos</h2>
+  <p>El <code>Text</code> de un TextBox <strong>siempre es string</strong>. Para calcular necesitas convertirlo a número.</p>
+  <table>
+    <tr><th>Método</th><th>Comportamiento</th></tr>
+    <tr><td><code>int.Parse(txt)</code></td><td>Convierte, pero <strong>lanza excepción</strong> si el texto no es válido.</td></tr>
+    <tr><td><code>int.TryParse(txt, out n)</code></td><td><strong>Recomendado.</strong> Devuelve <code>true/false</code> y no truena el programa.</td></tr>
+    <tr><td><code>Convert.ToInt32(txt)</code></td><td>Similar a Parse; también lanza excepción.</td></tr>
+  </table>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">private void btnCalcular_Click(object sender, EventArgs e)
+{
+    if (int.TryParse(txtEdad.Text, out int edad))
+    {
+        lblResultado.Text = $"El próximo año tendrás {edad + 1} años.";
+    }
+    else
+    {
+        MessageBox.Show("Escribe un número entero válido.", "Dato incorrecto",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        txtEdad.Focus();
+    }
+}</code></pre></div>
+  <h3>Validar que no esté vacío</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">if (string.IsNullOrWhiteSpace(txtNombre.Text))
+{
+    MessageBox.Show("El nombre es obligatorio.");
+    return;   // sale del método
+}</code></pre></div>
+  <h3>try / catch</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">try
+{
+    int n = int.Parse(txtNumero.Text);
+    lblResultado.Text = (100 / n).ToString();
+}
+catch (FormatException)
+{
+    MessageBox.Show("Eso no es un número.");
+}
+catch (DivideByZeroException)
+{
+    MessageBox.Show("No se puede dividir entre cero.");
+}</code></pre></div>
+</section>
+
+<section id="condicionales">
+  <h2>9. Condicionales</h2>
+  <h3>if / else if / else</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">double nota = double.Parse(txtNota.Text);
+
+if (nota &gt;= 90)
+    lblResultado.Text = "Excelente";
+else if (nota &gt;= 70)
+    lblResultado.Text = "Aprobado";
+else
+    lblResultado.Text = "Reprobado";</code></pre></div>
+  <h3>switch</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">int dia = (int)nudDia.Value;
+string nombreDia;
+
+switch (dia)
+{
+    case 1: nombreDia = "Lunes"; break;
+    case 2: nombreDia = "Martes"; break;
+    case 3: nombreDia = "Miércoles"; break;
+    default: nombreDia = "Otro día"; break;
+}
+lblResultado.Text = nombreDia;</code></pre></div>
+  <h3>RadioButton y CheckBox</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">string genero = rdbMasculino.Checked ? "Masculino" : "Femenino";   // operador ternario
+
+if (chkTerminos.Checked)
+    btnEnviar.Enabled = true;</code></pre></div>
+</section>
+
+<section id="bucles">
+  <h2>10. Ciclos</h2>
+  <table>
+    <tr><th>Ciclo</th><th>Cuándo usarlo</th></tr>
+    <tr><td><code>for</code></td><td>Sabes cuántas veces repetir.</td></tr>
+    <tr><td><code>while</code></td><td>Repites mientras se cumpla una condición.</td></tr>
+    <tr><td><code>do…while</code></td><td>Como while, pero se ejecuta al menos una vez.</td></tr>
+    <tr><td><code>foreach</code></td><td>Recorrer colecciones (listas, arreglos).</td></tr>
+  </table>
+  <h3>Tabla de multiplicar en un ListBox</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">private void btnTabla_Click(object sender, EventArgs e)
+{
+    if (!int.TryParse(txtNumero.Text, out int n)) return;
+
+    lstResultados.Items.Clear();
+    for (int i = 1; i &lt;= 10; i++)
+    {
+        lstResultados.Items.Add($"{n} x {i} = {n * i}");
+    }
+}</code></pre></div>
+  <h3>Suma acumulada con while</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">int contador = 1, suma = 0;
+while (contador &lt;= 100)
+{
+    suma += contador;
+    contador++;
+}
+lblResultado.Text = $"La suma de 1 a 100 es {suma}";</code></pre></div>
+  <div class="note"><strong>Evita ciclos infinitos:</strong> un <code>while</code> sin modificar la condición congela la ventana. Si pasa, detén la depuración con <code>Shift + F5</code>.</div>
+</section>
+
+<section id="listas">
+  <h2>11. ListBox y ComboBox</h2>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">// Llenar al cargar el formulario
+private void Form1_Load(object sender, EventArgs e)
+{
+    cmbCarreras.Items.Add("Sistemas");
+    cmbCarreras.Items.Add("Industrial");
+    cmbCarreras.Items.Add("Civil");
+    cmbCarreras.SelectedIndex = 0;      // selecciona el primero
+}
+
+// Reaccionar al cambio de selección
+private void cmbCarreras_SelectedIndexChanged(object sender, EventArgs e)
+{
+    lblSeleccion.Text = "Elegiste: " + cmbCarreras.SelectedItem;
+}
+
+// Agregar y quitar elementos de un ListBox
+private void btnAgregar_Click(object sender, EventArgs e)
+{
+    if (!string.IsNullOrWhiteSpace(txtItem.Text))
+    {
+        lstTareas.Items.Add(txtItem.Text);
+        txtItem.Clear();
+        txtItem.Focus();
+    }
+}
+
+private void btnEliminar_Click(object sender, EventArgs e)
+{
+    if (lstTareas.SelectedIndex &gt;= 0)
+        lstTareas.Items.RemoveAt(lstTareas.SelectedIndex);
+}</code></pre></div>
+</section>
+
+<section id="mensajes">
+  <h2>12. MessageBox</h2>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">// Mensaje simple
+MessageBox.Show("Datos guardados correctamente.");
+
+// Con título e ícono
+MessageBox.Show("Revisa los campos.", "Atención",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+// Pregunta con respuesta
+DialogResult r = MessageBox.Show("¿Deseas salir?", "Confirmar",
+                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+if (r == DialogResult.Yes)
+{
+    Application.Exit();
+}</code></pre></div>
+</section>
+
+<section id="formularios">
+  <h2>13. Trabajar con varios formularios</h2>
+  <p>Agrega un formulario: <em>Proyecto → Agregar formulario (Windows Forms)</em>. Luego ábrelo desde otro:</p>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">private void btnAbrir_Click(object sender, EventArgs e)
+{
+    Form2 ventana = new Form2();
+
+    ventana.Show();          // no modal: puedes usar ambas ventanas
+    // ventana.ShowDialog(); // modal: bloquea la ventana anterior hasta cerrar esta
+}</code></pre></div>
+  <h3>Pasar datos a otro formulario</h3>
+<div class="code-wrap"><span class="file">Form2.cs</span><button class="copy">Copiar</button>
+<pre><code class="cs">public partial class Form2 : Form
+{
+    public Form2(string nombreUsuario)
+    {
+        InitializeComponent();
+        lblBienvenida.Text = $"Bienvenido, {nombreUsuario}";
+    }
+}</code></pre></div>
+<div class="code-wrap"><span class="file">Form1.cs</span><button class="copy">Copiar</button>
+<pre><code class="cs">Form2 f2 = new Form2(txtNombre.Text);
+f2.ShowDialog();</code></pre></div>
+</section>
+
+<section id="calculadora">
+  <h2>14. Proyecto guiado: calculadora básica</h2>
+  <p><strong>Controles:</strong> dos TextBox (<code>txtA</code>, <code>txtB</code>), un ComboBox (<code>cmbOperacion</code>) con <code>+ − × ÷</code>, un Button (<code>btnCalcular</code>) y un Label (<code>lblResultado</code>).</p>
+<div class="code-wrap"><span class="file">Form1.cs</span><button class="copy">Copiar</button>
+<pre><code class="cs">public partial class Form1 : Form
+{
+    public Form1()
+    {
+        InitializeComponent();
+    }
+
+    private void Form1_Load(object sender, EventArgs e)
+    {
+        cmbOperacion.Items.AddRange(new string[] { "+", "-", "*", "/" });
+        cmbOperacion.SelectedIndex = 0;
+        cmbOperacion.DropDownStyle = ComboBoxStyle.DropDownList;
+    }
+
+    private void btnCalcular_Click(object sender, EventArgs e)
+    {
+        if (!double.TryParse(txtA.Text, out double a) ||
+            !double.TryParse(txtB.Text, out double b))
+        {
+            MessageBox.Show("Ingresa dos números válidos.", "Error",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        double resultado = 0;
+        switch (cmbOperacion.SelectedItem.ToString())
+        {
+            case "+": resultado = a + b; break;
+            case "-": resultado = a - b; break;
+            case "*": resultado = a * b; break;
+            case "/":
+                if (b == 0)
+                {
+                    MessageBox.Show("No se puede dividir entre cero.");
+                    return;
+                }
+                resultado = a / b;
+                break;
+        }
+
+        lblResultado.Text = $"Resultado: {resultado:N2}";   // 2 decimales
+    }
+}</code></pre></div>
+  <div class="tip"><strong>Reto extra:</strong> agrega un botón "Limpiar" que borre los campos y devuelva el foco a <code>txtA</code>. Pista: <code>txtA.Clear();</code> y <code>txtA.Focus();</code>.</div>
+</section>
+
+<section id="errores">
+  <h2>15. Errores comunes</h2>
+  <table>
+    <tr><th>Problema</th><th>Causa probable</th><th>Solución</th></tr>
+    <tr><td><code>FormatException</code></td><td>Usaste <code>Parse</code> con texto vacío o con letras.</td><td>Usa <code>TryParse</code>.</td></tr>
+    <tr><td><code>NullReferenceException</code></td><td>Usas <code>SelectedItem</code> sin haber seleccionado nada.</td><td>Verifica <code>!= null</code> o fija <code>SelectedIndex</code>.</td></tr>
+    <tr><td>El botón no hace nada</td><td>Se borró el evento del diseñador o se duplicó.</td><td>Revisa Propiedades → ⚡ → Click.</td></tr>
+    <tr><td>Error "no existe el nombre 'txtX'"</td><td>Cambiaste el <code>(Name)</code> del control pero no el código.</td><td>Renombra desde Propiedades y corrige las referencias.</td></tr>
+    <tr><td>Operación da resultado entero</td><td>División entre <code>int</code>.</td><td>Usa <code>double</code> o convierte con <code>(double)</code>.</td></tr>
+    <tr><td>Ventana congelada</td><td>Ciclo infinito.</td><td>Revisa la condición del ciclo.</td></tr>
+  </table>
+</section>
+
+<section id="practicas">
+  <h2>16. Buenas prácticas</h2>
+  <ul>
+    <li><strong>Nombra los controles</strong> con prefijo y significado: <code>txtApellido</code>, <code>btnGuardar</code>.</li>
+    <li><strong>Valida siempre</strong> lo que escribe el usuario antes de operar con ello.</li>
+    <li><strong>Separa la lógica de la interfaz:</strong> crea métodos aparte (por ejemplo <code>CalcularPromedio(...)</code>) en lugar de escribir todo dentro del evento.</li>
+    <li><strong>Usa comentarios</strong> para explicar el <em>porqué</em>, no lo obvio.</li>
+    <li><strong>Una acción, un método:</strong> métodos cortos son más fáciles de depurar.</li>
+    <li><strong>Prueba casos límite:</strong> vacío, cero, negativos, números muy grandes.</li>
+    <li>Configura <code>TabIndex</code> y <code>AcceptButton</code> del formulario para que la app se pueda usar con teclado.</li>
+  </ul>
+  <h3>Ejemplo: separar lógica de la interfaz</h3>
+<div class="code-wrap"><button class="copy">Copiar</button>
+<pre><code class="cs">// Lógica reutilizable
+private double CalcularPromedio(double n1, double n2, double n3)
+{
+    return (n1 + n2 + n3) / 3;
+}
+
+// Evento solo coordina
+private void btnPromedio_Click(object sender, EventArgs e)
+{
+    if (double.TryParse(txtN1.Text, out double a) &amp;&amp;
+        double.TryParse(txtN2.Text, out double b) &amp;&amp;
+        double.TryParse(txtN3.Text, out double c))
+    {
+        lblPromedio.Text = CalcularPromedio(a, b, c).ToString("F2");
+    }
+}</code></pre></div>
+</section>
+
+<section id="ejercicios">
+  <h2>17. Ejercicios propuestos</h2>
+  <div class="exwrap">
+    <div class="ex"><h4>Conversor de temperatura</h4><p>Convierte °C a °F con la fórmula <code>F = C × 9/5 + 32</code>. Valida que el dato sea numérico.</p></div>
+    <div class="ex"><h4>Número par o impar</h4><p>Pide un entero y muestra si es par o impar usando el operador <code>%</code>.</p></div>
+    <div class="ex"><h4>Promedio de calificaciones</h4><p>Tres TextBox de notas. Muestra el promedio y si el alumno aprueba (≥ 70) o reprueba.</p></div>
+    <div class="ex"><h4>Tabla de multiplicar</h4><p>Genera la tabla del número ingresado en un ListBox usando <code>for</code>.</p></div>
+    <div class="ex"><h4>Lista de tareas</h4><p>Agrega y elimina elementos de un ListBox. Muestra cuántas tareas hay en un Label.</p></div>
+    <div class="ex"><h4>Login simple</h4><p>Usuario y contraseña (con <code>PasswordChar</code>). Si son correctos, abre un segundo formulario con un saludo; si no, muestra un <code>MessageBox</code> de error.</p></div>
+    <div class="ex"><h4>Tienda con descuento</h4><p>Producto, cantidad y un CheckBox "Cliente frecuente" (10% de descuento). Calcula subtotal, IVA (16%) y total.</p></div>
+    <div class="ex"><h4>Adivina el número</h4><p>La app elige un número aleatorio del 1 al 100 (<code>new Random().Next(1, 101)</code>). El usuario intenta adivinar y se le indica si es mayor o menor. Cuenta los intentos.</p></div>
+  </div>
+</section>
+
+<section id="quiz">
+  <h2>18. Autoevaluación</h2>
+  <div id="quizBox"></div>
+  <button class="btn" id="quizBtn">Revisar respuestas</button>
+  <p id="quizScore" style="font-weight:600;margin-top:12px"></p>
+</section>
+
+</main>
+</div>
+
+<footer>
+  <div class="start">🪟 Inicio</div>
+  <div class="task">📘 Fundamentos de Programación · C# y Windows Forms</div>
+  <div class="clock" id="clock">--:--</div>
+</footer>
+
+<script>
+// ---- Resaltado de sintaxis sencillo ----
+(function(){
+  const KW = "abstract|as|base|bool|break|case|catch|char|class|const|continue|decimal|default|do|double|else|false|finally|float|for|foreach|if|in|int|internal|is|namespace|new|null|object|out|override|partial|private|public|return|static|string|switch|this|true|try|using|var|void|while";
+  const re = new RegExp("(//.*)|(\\$?\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)')|\\b(" + KW + ")\\b|\\b(\\d+(?:\\.\\d+)?m?)\\b|\\b([A-Z][A-Za-z0-9_]*)\\b","g");
+  document.querySelectorAll("pre code.cs").forEach(el=>{
+    const txt = el.textContent;
+    let out = "", last = 0, m;
+    const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    while((m = re.exec(txt))){
+      out += esc(txt.slice(last, m.index));
+      const cls = m[1] ? "c" : m[2] ? "s" : m[3] ? "k" : m[4] ? "n" : "t";
+      out += '<span class="'+cls+'">'+esc(m[0])+'</span>';
+      last = re.lastIndex;
+    }
+    out += esc(txt.slice(last));
+    el.innerHTML = out;
+  });
+})();
+
+// ---- Botones de copiar ----
+document.querySelectorAll(".copy").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const code = btn.parentElement.querySelector("code").textContent;
+    const done = ()=>{ btn.textContent="¡Copiado!"; setTimeout(()=>btn.textContent="Copiar",1500); };
+    if(navigator.clipboard){ navigator.clipboard.writeText(code).then(done).catch(done); }
+    else{
+      const ta=document.createElement("textarea"); ta.value=code; document.body.appendChild(ta);
+      ta.select(); try{document.execCommand("copy")}catch(e){} ta.remove(); done();
+    }
+  });
+});
+
+// ---- Reloj de la barra de tareas ----
+(function(){
+  const c = document.getElementById("clock");
+  const tick = ()=>{ c.textContent = new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}); };
+  tick(); setInterval(tick, 30000);
+})();
+
+// ---- Maqueta interactiva ----
+document.getElementById("demoBtn").addEventListener("click",()=>{
+  const n = document.getElementById("demoNombre").value;
+  document.getElementById("demoOut").textContent = "¡Hola, " + n + "!";
+});
+
+// ---- Índice activo al hacer scroll ----
+const links = [...document.querySelectorAll("#toc a")];
+const secs = links.map(a=>document.querySelector(a.getAttribute("href")));
+const obs = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove("active"));
+      const i = secs.indexOf(e.target);
+      if(i>=0) links[i].classList.add("active");
+    }
+  });
+},{rootMargin:"-20% 0px -70% 0px"});
+secs.forEach(s=>s&&obs.observe(s));
+
+// ---- Quiz ----
+const preguntas = [
+  {q:"¿Qué propiedad cambia el texto que muestra un Label?", o:["Value","Text","Name","Caption"], a:1, e:"Text es la propiedad que contiene el texto visible."},
+  {q:"¿Qué evento se dispara al hacer clic en un botón?", o:["Load","TextChanged","Click","KeyPress"], a:2, e:"Click responde al clic del usuario."},
+  {q:"El valor que escribe el usuario en un TextBox es siempre de tipo…", o:["int","double","bool","string"], a:3, e:"Text es string; hay que convertirlo para operar con números."},
+  {q:"¿Cuál es la forma más segura de convertir texto a entero?", o:["int.Parse","Convert.ToInt32","int.TryParse","(int)texto"], a:2, e:"TryParse devuelve true/false en lugar de lanzar excepción."},
+  {q:"¿Qué operador compara dos valores por igualdad?", o:["=","==","=>","!="], a:1, e:"== compara; = asigna."},
+  {q:"¿Qué archivo NO se debe editar manualmente?", o:["Form1.cs","Program.cs","Form1.Designer.cs","Un archivo creado por ti"], a:2, e:"El diseñador lo regenera automáticamente."},
+  {q:"¿Cuál es el resultado de 7 % 3 en C#?", o:["2","1","2.33","0"], a:1, e:"% devuelve el residuo de la división: 7 = 3·2 + 1."},
+  {q:"¿Qué método abre un formulario bloqueando el anterior hasta cerrarlo?", o:["Show()","Open()","ShowDialog()","Start()"], a:2, e:"ShowDialog() abre el formulario de forma modal."}
+];
+const box = document.getElementById("quizBox");
+preguntas.forEach((p,i)=>{
+  const d = document.createElement("div"); d.className="quiz-q"; d.id="q"+i;
+  d.innerHTML = "<strong>"+(i+1)+". "+p.q+"</strong>" +
+    p.o.map((t,j)=>'<label><input type="radio" name="p'+i+'" value="'+j+'"> '+t+'</label>').join("") +
+    '<div class="fb"></div>';
+  box.appendChild(d);
+});
+document.getElementById("quizBtn").addEventListener("click",()=>{
+  let ok = 0;
+  preguntas.forEach((p,i)=>{
+    const d = document.getElementById("q"+i);
+    const sel = d.querySelector("input:checked");
+    const fb = d.querySelector(".fb");
+    d.classList.remove("ok","bad");
+    if(!sel){ fb.textContent = "Sin responder."; d.classList.add("bad"); return; }
+    if(+sel.value === p.a){ ok++; d.classList.add("ok"); fb.textContent = "✅ Correcto. " + p.e; }
+    else { d.classList.add("bad"); fb.textContent = "❌ Incorrecto. " + p.e; }
+  });
+  document.getElementById("quizScore").textContent = "Puntaje: " + ok + " de " + preguntas.length;
+});
+</script>
+</body>
+</html>
